@@ -115,27 +115,36 @@ def _run_realtime_dashboard(
             )
 
             if pending is not None and pending.done():
-                active_decision = pending.result()
-                _record_decision(
-                    log,
-                    decision_index=pending_index,
-                    snapshot=pending_snapshot,
-                    decision=active_decision,
-                    reward=reward_since_decision,
-                    terminated=terminated,
-                    truncated=truncated,
-                )
-                print(
-                    f"#{pending_index:04d} x={pending_snapshot.x:04d} "
-                    f"action={active_decision.action.value:<15} "
-                    f"confidence={active_decision.confidence:.2f} "
-                    f"latency={active_decision.latency_ms:.0f}ms"
-                )
-                pending = None
-                reward_since_decision = 0.0
-                decision_updated = True
-                previous_latency_ms = active_decision.latency_ms
-                previous_response_delay_frames = frame_index - pending_request_frame
+                try:
+                    new_decision = pending.result()
+                except Exception as exc:  # noqa: BLE001 - a Jev request can fail for many reasons
+                    print(
+                        f"#{pending_index:04d} jev request failed ({type(exc).__name__}: {exc}); "
+                        "keeping the previous action and retrying next decision"
+                    )
+                    pending = None
+                else:
+                    active_decision = new_decision
+                    _record_decision(
+                        log,
+                        decision_index=pending_index,
+                        snapshot=pending_snapshot,
+                        decision=active_decision,
+                        reward=reward_since_decision,
+                        terminated=terminated,
+                        truncated=truncated,
+                    )
+                    print(
+                        f"#{pending_index:04d} x={pending_snapshot.x:04d} "
+                        f"action={active_decision.action.value:<15} "
+                        f"confidence={active_decision.confidence:.2f} "
+                        f"latency={active_decision.latency_ms:.0f}ms"
+                    )
+                    pending = None
+                    reward_since_decision = 0.0
+                    decision_updated = True
+                    previous_latency_ms = active_decision.latency_ms
+                    previous_response_delay_frames = frame_index - pending_request_frame
 
             run_ended = bool(
                 snapshot.dead
