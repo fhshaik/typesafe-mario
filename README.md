@@ -38,6 +38,15 @@ lawfully.
 
 ## Setup
 
+With the Makefile (macOS/Linux):
+
+```bash
+make install                    # create .venv and install .[mario,dev]
+export TYPESAFE_API_KEY=your-key
+```
+
+Or manually (Windows):
+
 ```powershell
 py -3.13 -m venv .venv
 .venv\Scripts\python -m pip install -e ".[mario,dev]"
@@ -53,6 +62,15 @@ game or calling the API:
 
 Run World 1-1 with Jev making a decision every eight emulator steps. The default
 display is a single recordable window with the live game and model telemetry:
+
+```bash
+make run
+# or with extra flags:
+make run ARGS="--env SuperMarioBros-1-1-v0 --frames-per-decision 8"
+make run ARGS="--policy heuristic --display none"
+```
+
+The flags above are the defaults, so plain `make run` is enough. Without make:
 
 ```powershell
 .venv\Scripts\typesafe-mario play --env SuperMarioBros-1-1-v0 --frames-per-decision 8
@@ -112,6 +130,14 @@ response age, enemy motion, action cadence, and jump-clearance time into a typed
 controller choice—there is no scripted recovery-action override.
 
 ## Development
+
+```bash
+make test    # pytest
+make lint    # ruff check src tests
+make clean   # remove caches (.ruff_cache, .pytest_cache, __pycache__)
+```
+
+Or manually:
 
 ```powershell
 .venv\Scripts\ruff format --check src tests

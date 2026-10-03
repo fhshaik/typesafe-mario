@@ -18,7 +18,7 @@ mario = [
   "gymnasium",
   "nes-py>=9.0.1",
   "numpy>=2.1",
-  "pygame>=2.6",
+  "pygame-ce>=2.5.8",
 ]
 dev = [
   "pytest>=8",
